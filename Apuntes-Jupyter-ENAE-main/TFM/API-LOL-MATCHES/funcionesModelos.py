@@ -1,4 +1,5 @@
 import pandas as pd
+from getChampId import getChampionsId
 
 df = pd.read_csv("Apuntes-Jupyter-ENAE-main\TFM\API-LOL-MATCHES\EUW1_6381286401.csv")
 #print(df)
@@ -146,4 +147,37 @@ def deathsMotor(df: pd.DataFrame):
 
     return dfModelo5
 
+def killsDeathsAssists(df: pd.DataFrame):
+    dfGeneral = pd.DataFrame()
+    columnasMod7 = ["info.gameMode", "teamPosition", "championId", "championName", "kills", "deaths", "assists", "win"]
+    dfGeneral = df[columnasMod7]
+    dfGeneral.columns.values[1] = "role"
 
+    # Separar los DF en 2 (uno para cada equipo)
+    dfTeamX = dfGeneral.iloc[:5]
+    dfTeamY = dfGeneral.iloc[5:]
+
+    dfTeamX1 = pd.merge(dfTeamX, dfTeamY, on="role", how="inner")
+    dfTeamY1 = pd.merge(dfTeamY, dfTeamX, on="role", how="inner")
+
+    dfModelo7 = pd.concat([dfTeamX1, dfTeamY1], ignore_index=True)
+    dfModelo7["win_x"] = dfModelo7["win_x"].astype(int)
+    dfModelo7.drop(columns=["win_y"], inplace=True)
+    dfModelo7 = dfModelo7.rename(columns={"championId_y": "rivalId", "championName_y": "rivalName",
+                                          "championId_x": "championId", "championName_x": "championName",
+                                          "kills_x": "kills", "deaths_x": "deaths", "assists_x": "assists",
+                                          "kills_y": "rival_kills", "deaths_y": "rival_deaths", "assists_y": "rival_assists",
+                                          "win_x": "win"})
+    win_column = dfModelo7.pop("win")  # Extraer la columna "win"
+    dfModelo7["win"] = win_column  # Agregar la columna "win" al final del DataFrame
+
+    return dfModelo7
+
+def experienceChampion():
+    
+    dfGetChampionId = getChampionsId()
+
+
+    return
+
+a = experienceChampion()
